@@ -11,7 +11,7 @@ class Theme:
     def color_text(text, color_code):
         """Aplica cor ao texto se estiver habilitado."""
         if GameConfig.USE_COLORS:
-            return f"\003{color_code}m{text}\033[0m]"
+            return f"\033[{color_code}m{text}\033[0m"  # Corrigido o código ANSI
         return text
     
     @classmethod
@@ -37,6 +37,7 @@ class Theme:
     @classmethod
     def title(cls, text):
         return cls.highlight(cls.info(text))
+
     
 class HangmanTheme(Theme):
     """Tema especifico para o jogo da forca"""

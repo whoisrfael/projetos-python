@@ -1,7 +1,3 @@
-"""
-Sistema de salvar/carregar jogos e pontuações.
-"""
-
 import json
 from pathlib import Path
 from datetime import datetime
@@ -14,8 +10,8 @@ class GameSaveManager:
 
     @staticmethod
     def ensure_data_dir():
-        """Garante que o diretorio de dados existe."""
-        GameConfig.get_scores_file().parent.mkdir(existe_ok=True)
+        """Garante que o diretório de dados existe."""
+        GameConfig.get_scores_file().parent.mkdir(exist_ok=True)
 
     @classmethod
     def save_game(cls, game_data: Dict[str, Any], filename: Optional[str] = None) -> str:
@@ -35,15 +31,15 @@ class GameSaveManager:
 
         try:
             cls.ensure_data_dir()
-            timestamp = datetime.now().strtime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             save_file = filename or f"hangman_save_{timestamp}.json"
             save_path = GameConfig.get_scores_file().parent / save_file
 
             with open(save_path, 'w', encoding='utf-8') as f:
-                json.dump(game_data, f, ensure_ascii=False, ident=2)
+                json.dump(game_data, f, ensure_ascii=False, indent=2)
 
             return str(save_path)
-        except (IOError, json.JSONEncoderError) as e:
+        except (IOError, ValueError) as e:  # Substituir JSONEncoderError por ValueError
             raise SaveLoadError(f"Erro ao salvar jogo: {str(e)}")
         
 
@@ -76,16 +72,16 @@ class GameSaveManager:
         Atualiza o placar de pontuações.
         
         Args:
-            player_name: Noe do jogador
+            player_name: Nome do jogador
             score: Pontuação alcançada
-            word: Palavras adivinhada ( ou nao)
+            word: Palavra adivinhada (ou não)
         """
         
         try:
             cls.ensure_data_dir()
             scores_file = GameConfig.get_scores_file()
 
-            # Carrega pontuaçoes existentes ou cria uma nova
+            # Carrega pontuações existentes ou cria uma nova
             if scores_file.exists():
                 with open(scores_file, 'r', encoding='utf-8') as f:
                     scores = json.load(f)
@@ -93,7 +89,7 @@ class GameSaveManager:
             else:
                 scores = []
 
-            #Adiciona nova pontuação
+            # Adiciona nova pontuação
             scores.append({
                 "player": player_name,
                 "score": score,
@@ -101,7 +97,7 @@ class GameSaveManager:
                 "date": datetime.now().isoformat()
             })
 
-            # Mantem apenas as top 10
+            # Mantém apenas as top 10
             scores.sort(key=lambda x: x['score'], reverse=True)
             scores = scores[:10]
 
@@ -110,22 +106,17 @@ class GameSaveManager:
                 json.dump(scores, f, ensure_ascii=False, indent=2)
 
             
-        except (IOError, json.JSONDecodeError, json.JSONDecodeError) as e:
+        except (IOError, json.JSONDecodeError, ValueError) as e:  # Corrigido para capturar ValueError
             raise SaveLoadError(f"Erro ao atualizar pontuações: {str(e)}")
         
 
 
     @classmethod
     def list_saves(cls) -> list:
-        """Lista todos os jogos salvos disponiveis."""
+        """Lista todos os jogos salvos disponíveis."""
         try: 
             cls.ensure_data_dir()
             save_dir = GameConfig.get_scores_file().parent
             return [f.name for f in save_dir.glob("hangman_save_*.json")]
         except IOError as e:
             raise SaveLoadError(f"Erro ao listar jogos salvos: {str(e)}")
-
-
-    
-
-        
