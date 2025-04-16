@@ -35,9 +35,9 @@ class GameSaveManager:
 
         try:
             cls.ensure_data_dir()
-            timestamp = datatime.now().strtime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now().strtime("%Y%m%d_%H%M%S")
             save_file = filename or f"hangman_save_{timestamp}.json"
-            save_path = GameConfig.get_scores_file(.parent / save_file)
+            save_path = GameConfig.get_scores_file().parent / save_file
 
             with open(save_path, 'w', encoding='utf-8') as f:
                 json.dump(game_data, f, ensure_ascii=False, ident=2)
@@ -83,11 +83,11 @@ class GameSaveManager:
         
         try:
             cls.ensure_data_dir()
-            score_file = GameConfig.get_scores_file()
+            scores_file = GameConfig.get_scores_file()
 
             # Carrega pontuaçoes existentes ou cria uma nova
-            if score_file.exists():
-                with open(score_file, 'r', encoding='utf-8') as f:
+            if scores_file.exists():
+                with open(scores_file, 'r', encoding='utf-8') as f:
                     scores = json.load(f)
 
             else:
